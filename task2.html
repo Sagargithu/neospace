@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do Web App</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 1em;
+            text-align: center;
+        }
+
+        main {
+            margin: 20px;
+        }
+
+        input[type="text"] {
+            width: 60%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #fff;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        button {
+            background-color: #333;
+            color: #fff;
+            padding: 8px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>To-Do Web App</h1>
+    </header>
+
+    <main>
+        <input type="text" id="taskInput" placeholder="Add a new task...">
+        <button onclick="addTask()">Add Task</button>
+
+        <h2>Pending Tasks</h2>
+        <ul id="pendingTasks">
+            <!-- Pending tasks will be added here dynamically -->
+        </ul>
+
+        <h2>Completed Tasks</h2>
+        <ul id="completedTasks">
+            <!-- Completed tasks will be added here dynamically -->
+        </ul>
+    </main>
+
+    <script>
+        function addTask() {
+            const taskInput = document.getElementById("taskInput");
+            const taskText = taskInput.value.trim();
+
+            if (taskText !== "") {
+                const task = {
+                    text: taskText,
+                    date: new Date().toLocaleString(),
+                    completed: false
+                };
+
+                // Save the task to local storage
+                let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+                tasks.push(task);
+                localStorage.setItem("tasks", JSON.stringify(tasks));
+
+                // Update the display
+                updateTaskList();
+            }
+
+            // Clear the input field
+            taskInput.value = "";
+        }
+
+        function toggleComplete(index) {
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks[index].completed = !tasks[index].completed;
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+
+            // Update the display
+            updateTaskList();
+        }
+
+        function deleteTask(index) {
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks.splice(index, 1);
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+
+            // Update the display
+            updateTaskList();
+        }
+
+        function updateTaskList() {
+            const pendingTasksList = document.getElementById("pendingTasks");
+            const completedTasksList = document.getElementById("completedTasks");
+
+            // Clear existing tasks
+            pendingTasksList.innerHTML = "";
+            completedTasksList.innerHTML = "";
+
+            // Get tasks from local storage
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+            // Iterate through tasks and update the display
+            tasks.forEach((task, index) => {
+                const listItem = document.createElement("li");
+                listItem.innerHTML = `
+                    <span class="${task.completed ? 'completed' : ''}">${task.text} - ${task.date}</span>
+                    <span>
+                        <button onclick="toggleComplete(${index})">${task.completed ? 'Undo' : 'Complete'}</button>
+                        <button onclick="deleteTask(${index})">Delete</button>
+                    </span>
+                `;
+
+                if (task.completed) {
+                    completedTasksList.appendChild(listItem);
+                } else {
+                    pendingTasksList.appendChild(listItem);
+                }
+            });
+        }
+
+        // Initial update on page load
+        updateTaskList();
+    </script>
+
+</body>
+</html>
